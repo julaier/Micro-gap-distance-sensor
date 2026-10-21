@@ -1,0 +1,71 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Keil: 构建 (Build)",
+            "type": "shell",
+            "command": "${workspaceFolder}\\tools\\keil_build.cmd",
+            "args": ["build"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "problemMatcher": {
+                "owner": "keil",
+                "fileLocation": ["relative", "${workspaceFolder}\\MDK-ARM"],
+                "pattern": {
+                    "regexp": "^(.+?)\\((\\d+)\\): (warning|error):\\s*(.+)$",
+                    "file": 1,
+                    "line": 2,
+                    "severity": 3,
+                    "message": 4
+                }
+            },
+            "group": { "kind": "build", "isDefault": true },
+            "presentation": { "reveal": "always", "panel": "shared", "clear": true }
+        },
+        {
+            "label": "Keil: 重新构建 (Rebuild)",
+            "type": "shell",
+            "command": "${workspaceFolder}\\tools\\keil_build.cmd",
+            "args": ["rebuild"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "problemMatcher": {
+                "owner": "keil",
+                "fileLocation": ["relative", "${workspaceFolder}\\MDK-ARM"],
+                "pattern": {
+                    "regexp": "^(.+?)\\((\\d+)\\): (warning|error):\\s*(.+)$",
+                    "file": 1,
+                    "line": 2,
+                    "severity": 3,
+                    "message": 4
+                }
+            },
+            "presentation": { "reveal": "always", "panel": "shared", "clear": true }
+        },
+        {
+            "label": "Keil: 下载到 ST-Link (Build + Flash)",
+            "type": "shell",
+            "command": "${workspaceFolder}\\tools\\keil_build.cmd",
+            "args": ["flash"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "problemMatcher": {
+                "owner": "keil",
+                "fileLocation": ["relative", "${workspaceFolder}\\MDK-ARM"],
+                "pattern": {
+                    "regexp": "^(.+?)\\((\\d+)\\): (warning|error):\\s*(.+)$",
+                    "file": 1,
+                    "line": 2,
+                    "severity": 3,
+                    "message": 4
+                }
+            },
+            "presentation": { "reveal": "always", "panel": "shared", "clear": true }
+        },
+        {
+            "label": "Keil: 打开 uVision",
+            "type": "process",
+            "command": "D:\\keil32\\UV4\\UV4.exe",
+            "args": ["${workspaceFolder}\\MDK-ARM\\LDC1614.uvprojx"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "presentation": { "reveal": "silent" }
+        }
+    ]
+}

@@ -1,0 +1,24 @@
+{
+    "version": 4,
+    "configurations": [
+        {
+            "name": "STM32F103 (Keil ARMCC)",
+            "includePath": [
+                "${workspaceFolder}/App",
+                "${workspaceFolder}/Driver",
+                "${workspaceFolder}/Device",
+                "${workspaceFolder}/Service",
+                "${workspaceFolder}/CMSIS",
+                "${workspaceFolder}/Library/inc"
+            ],
+            "defines": [
+                "STM32F10X_MD",
+                "USE_STDPERIPH_DRIVER"
+            ],
+            "cStandard": "c99",
+            "cppStandard": "c++03",
+            "intelliSenseMode": "gcc-arm",
+            "compilerPath": ""
+        }
+    ]
+}

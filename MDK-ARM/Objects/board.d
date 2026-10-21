@@ -1,0 +1,17 @@
+.\objects\board.o: ..\Driver\board.c
+.\objects\board.o: ..\CMSIS\stm32f10x.h
+.\objects\board.o: ..\CMSIS\core_cm3.h
+.\objects\board.o: D:\keil32\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\board.o: ..\CMSIS\system_stm32f10x.h
+.\objects\board.o: ..\Library\inc\stm32f10x_conf.h
+.\objects\board.o: ..\Library\inc\stm32f10x_adc.h
+.\objects\board.o: ..\CMSIS\stm32f10x.h
+.\objects\board.o: ..\Library\inc\stm32f10x_exti.h
+.\objects\board.o: ..\Library\inc\stm32f10x_flash.h
+.\objects\board.o: ..\Library\inc\stm32f10x_gpio.h
+.\objects\board.o: ..\Library\inc\stm32f10x_i2c.h
+.\objects\board.o: ..\Library\inc\stm32f10x_iwdg.h
+.\objects\board.o: ..\Library\inc\stm32f10x_rcc.h
+.\objects\board.o: ..\Library\inc\stm32f10x_usart.h
+.\objects\board.o: ..\Library\inc\misc.h
+.\objects\board.o: ..\Driver\board.h

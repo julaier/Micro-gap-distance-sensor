@@ -1,0 +1,19 @@
+{
+    "files.associations": {
+        "*.uvprojx": "xml",
+        "*.uvoptx": "xml",
+        "*.s": "arm"
+    },
+    "files.encoding": "utf8",
+    "files.eol": "\r\n",
+    "files.trimTrailingWhitespace": true,
+    "C_Cpp.default.cStandard": "c99",
+    "C_Cpp.default.defines": [
+        "STM32F10X_MD",
+        "USE_STDPERIPH_DRIVER"
+    ],
+    "search.exclude": {
+        "**/MDK-ARM/Objects": true,
+        "**/MDK-ARM/Listings": true
+    }
+}

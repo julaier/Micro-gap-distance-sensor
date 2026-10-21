@@ -1,0 +1,27 @@
+--cpu Cortex-M3
+".\objects\core_cm3.o"
+".\objects\system_stm32f10x.o"
+".\objects\misc.o"
+".\objects\stm32f10x_adc.o"
+".\objects\stm32f10x_exti.o"
+".\objects\stm32f10x_flash.o"
+".\objects\stm32f10x_gpio.o"
+".\objects\stm32f10x_i2c.o"
+".\objects\stm32f10x_iwdg.o"
+".\objects\stm32f10x_rcc.o"
+".\objects\stm32f10x_usart.o"
+".\objects\startup_stm32f10x_md.o"
+".\objects\main.o"
+".\objects\app.o"
+".\objects\board.o"
+".\objects\hard_i2c.o"
+".\objects\uart.o"
+".\objects\adc_temp.o"
+".\objects\flash_param.o"
+".\objects\ldc1614.o"
+".\objects\measure.o"
+".\objects\protocol.o"
+--library_type=microlib --strict --scatter ".\Objects\LDC1614.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list ".\Listings\LDC1614.map" -o .\Objects\LDC1614.axf
