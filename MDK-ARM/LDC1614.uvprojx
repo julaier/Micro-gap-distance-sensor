@@ -521,6 +521,26 @@
               <FilePath>..\Driver\uart.h</FilePath>
             </File>
             <File>
+              <FileName>oled.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Driver\oled.c</FilePath>
+            </File>
+            <File>
+              <FileName>oled.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Driver\oled.h</FilePath>
+            </File>
+            <File>
+              <FileName>button.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Driver\button.c</FilePath>
+            </File>
+            <File>
+              <FileName>button.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Driver\button.h</FilePath>
+            </File>
+            <File>
               <FileName>adc_temp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Driver\adc_temp.c</FilePath>

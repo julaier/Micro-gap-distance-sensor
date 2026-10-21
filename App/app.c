@@ -2,6 +2,7 @@
  * app.c - 应用层实现
  */
 
+#include <string.h>
 #include "app.h"
 #include "board.h"
 #include "uart.h"
@@ -9,20 +10,27 @@
 #include "ldc1614.h"
 #include "measure.h"
 #include "protocol.h"
+#include "oled.h"
+#include "button.h"
 
 /* ---- 可调参数 ---- */
 #define APP_BAUD          115200u   /* 上位机串口波特率, 接 CH340 */
 #define APP_REPORT_MS     100u      /* 周期上报, 100ms */
 #define APP_TEMP_MS       1000u     /* 温度每秒读一次 */
-#define APP_POLL_MS       20u       /* INTB 没接到也能跑: 每 20ms 主动读一次原始值 */
-#define APP_DATA_TIMEOUT  500u      /* 超过这么久没读到数据就判故障 */
+#define APP_INTB_TIMEOUT  500u      /* 超过这么久没有 INTB 就判故障 */
+#define APP_OLED_MS       250u      /* OLED 刷新周期, 别太快, 免得占满 I2C */
 #define APP_I2C_DEBUG     1         /* 1 = LDC 初始化失败时打总线诊断, 调好后改 0 */
 
 static char s_out[192];
-static uint32_t s_last_data_ms;/*上次成功读到原始值的时间戳*/
-static uint32_t s_last_poll_ms;/*上次主动轮询的时间戳*/
+static uint32_t s_last_intb_ms;/*上次收到 INTB 的时间戳*/
 static uint32_t s_last_temp_ms;
+static uint32_t s_last_oled_ms;
 static float    s_temp_c;
+static uint8_t  s_oled_ok;     /*1 = OLED 正常应答*/
+static uint8_t  s_page;        /*0 = 主界面, 1 = 调试界面*/
+static uint8_t  s_hold;        /*1 = 冻结显示*/
+static measure_result_t s_show;/*OLED 正在显示的一份数据*/
+
 /*用于发送数据*/
 static void send(const char *buf, int len)
 {
@@ -159,18 +167,173 @@ static void report_i2c_debug(void)
 }
 #endif
 
+/* ------------------------------------------------------------------ */
+/* OLED 显示                                                            */
+/* ------------------------------------------------------------------ */
+
+static const char *status_text(uint8_t st)
+{
+    switch (st) {
+    case 0u: return "NORMAL";
+    case 1u: return "WARN";
+    case 2u: return "ALARM";
+    case 3u: return "FAULT";
+    default: return "UNCAL";
+    }
+}
+//无符号整数转十进制字符串
+static void fmt_u32(char *buf, uint32_t v)
+{
+    char tmp[12];
+    int n = 0;
+
+    do {
+        tmp[n++] = (char)('0' + (v % 10u));
+        v /= 10u;
+    } while (v > 0u);
+    while (n > 0) {
+        *buf++ = tmp[--n];
+    }
+    *buf = '\0';
+}
+//浮点数转固定小数位字符串, 例如 fmt_fixed(buf, 0.52f, 2) -> "0.52"
+static void fmt_fixed(char *buf, float v, uint8_t dec)
+{
+    static const uint32_t P10[6] = {1u, 10u, 100u, 1000u, 10000u, 100000u};
+    uint32_t scale = P10[dec];
+    int32_t scaled;
+    uint32_t u;
+    char tmp[12];
+    int n = 0;
+    int i;
+    char *p = buf;
+
+    scaled = (int32_t)((v >= 0.0f) ? (v * (float)scale + 0.5f)
+                                   : (v * (float)scale - 0.5f));
+    if (scaled < 0) {
+        *p++ = '-';
+        u = (uint32_t)(-scaled);
+    } else {
+        u = (uint32_t)scaled;
+    }
+
+    do {
+        tmp[n++] = (char)('0' + (u % 10u));
+        u /= 10u;
+    } while (u > 0u);
+    while (n <= (int)dec) {
+        tmp[n++] = '0';
+    }
+
+    for (i = n - 1; i >= 0; i--) {
+        if (dec > 0u && i == (int)dec - 1) {
+            *p++ = '.';
+        }
+        *p++ = tmp[i];
+    }
+    *p = '\0';
+}
+
+/* 主界面: 距离(大字) + 温度 + 状态 */
+static void draw_main(const measure_result_t *r)
+{
+    char num[12];
+
+    oled_draw_str(0, 0, "GAP", 1);
+    oled_draw_str_right(OLED_WIDTH - 1, 0, status_text(r->status), 1);
+
+    if (r->valid != 0u) {
+        fmt_fixed(num, r->dist_mm, 2);
+    } else {
+        strcpy(num, "--.--");
+    }
+    oled_draw_str(0, 14, num, 3);
+    oled_draw_str(oled_text_width(num, 3) + 4, 30, "MM", 1);
+
+    oled_draw_str(0, 40, "T", 1);
+    fmt_fixed(num, r->temp_c, 1);
+    oled_draw_str(12, 40, num, 1);
+    oled_draw_str(12 + oled_text_width(num, 1) + 3, 40, "C", 1);
+
+    oled_draw_str(0, 52, "R", 1);
+    fmt_fixed(num, r->ratio, 5);
+    oled_draw_str(12, 52, num, 1);
+
+    if (s_hold != 0u) {
+        oled_draw_str_right(OLED_WIDTH - 1, 52, "HOLD", 1);
+    }
+}
+
+/* 调试界面: 原始值 + 比值 */
+static void draw_debug(const measure_result_t *r)
+{
+    char buf[16];
+
+    oled_draw_str(0, 0, "DEBUG", 1);
+
+    oled_draw_str(0, 12, "CH0", 1);
+    fmt_u32(buf, r->ch0);
+    oled_draw_str(30, 12, buf, 1);
+
+    oled_draw_str(0, 22, "CH1", 1);
+    fmt_u32(buf, r->ch1);
+    oled_draw_str(30, 22, buf, 1);
+
+    oled_draw_str(0, 32, "RATIO", 1);
+    fmt_fixed(buf, r->ratio, 5);
+    oled_draw_str(42, 32, buf, 1);
+
+    oled_draw_str(0, 42, "TEMP", 1);
+    fmt_fixed(buf, r->temp_c, 1);
+    oled_draw_str(42, 42, buf, 1);
+
+    oled_draw_str(0, 52, "ST", 1);
+    oled_draw_str(18, 52, status_text(r->status), 1);
+
+    if (s_hold != 0u) {
+        oled_draw_str_right(OLED_WIDTH - 1, 52, "HOLD", 1);
+    }
+}
+
+static void display_update(void)
+{
+    if (s_oled_ok == 0u) {
+        return;
+    }
+
+    if (s_hold == 0u) {
+        s_show = *measure_latest();
+    }
+
+    oled_clear();
+    if (s_page == 0u) {
+        draw_main(&s_show);
+    } else {
+        draw_debug(&s_show);
+    }
+    oled_flush();
+}
+
+/* ------------------------------------------------------------------ */
+
 void app_init(void)
 {
     int rc;
 
     board_init();
     uart_init(APP_BAUD);
+    button_init();
 
     /* 开机先报一句: 串口通没通、时钟是 72MHz 还是退到了 HSI 8MHz。
      * 后面不管卡在哪个模块, 至少这几行能说明前面是好的。 */
     uart_puts(board_clock_is_72m() ? "$B,BOOT,72M\r\n" : "$B,BOOT,HSI\r\n");
 
     ldc1614_init_driver();/*就是i2c硬件初始化*/
+
+    /* OLED 和 LDC1614 挂在同一条 I2C 总线上 */
+    s_oled_ok = (oled_init() == 0) ? 1u : 0u;
+    uart_puts(s_oled_ok ? "$B,OLED OK\r\n" : "$B,OLED FAIL\r\n");
+
     adc_temp_init();
 
     measure_init();
@@ -197,30 +360,40 @@ void app_init(void)
         }
     }
     s_last_temp_ms = board_millis();/*记录上次读取温度的时间戳*/
-    s_last_data_ms = s_last_temp_ms;/*记录上次读到数据的时间戳*/
-    s_last_poll_ms = s_last_temp_ms;/*记录上次轮询的时间戳*/
+    s_last_intb_ms = s_last_temp_ms;/*记录上次收到 INTB 的时间戳*/
 
     if (rc == 0) {
         uart_puts("$B,LDC1614 ready\r\n");
     }
+
+    s_show = *measure_latest();/*先把当前(未标定)状态拿来画一屏*/
+    s_last_oled_ms = board_millis();
+    display_update();
 }
 
 void app_poll(void)
 {
     uint32_t now = board_millis();/*现在的时间戳*/
 
-    /* ---- 1. 采样 ----
-     * INTB 触发就当快路径用; 但 INTB 那根线可能没接到 MCU,
-     * 所以再加一条定时轮询兜底: 每 APP_POLL_MS 主动读一次原始值。
-     * 两条路走同一段代码, 谁先来算谁。 */
-    if (board_intb_take() ||
-        (uint32_t)(now - s_last_poll_ms) >= APP_POLL_MS) {
-        s_last_poll_ms = now;
+    /* ---- 0. 按键 ---- */
+    button_scan(now);
+
+    if (button_short_press(BTN_KEY1)) {
+        s_page = (uint8_t)((s_page == 0u) ? 1u : 0u);/*主界面 <-> 调试界面*/
+        display_update();
+    }
+    if (button_short_press(BTN_KEY2)) {
+        s_hold = (uint8_t)((s_hold == 0u) ? 1u : 0u);/*冻结/恢复显示*/
+        display_update();
+    }
+
+    /* ---- 1. 采样: INTB 到了就读一次 ---- */
+    if (board_intb_take()) {
         uint32_t ch0 = 0u;
         uint32_t ch1 = 0u;
         uint16_t err = 0u;
 
-        s_last_data_ms = now;/*更新上次读到数据的时间戳*/
+        s_last_intb_ms = now;//更新上次INTB中断的时间戳
 
         if (ldc1614_read_raw(&ch0, &ch1, &err) == 0) {
             //如果距离上次读温度的时间大于APP_TEMP_MS，就再读一次温度，单位为摄氏度
@@ -234,12 +407,18 @@ void app_poll(void)
         }
     }
 
-    /* ---- 2. 长时间读不到数据 -> 故障 ---- */
-    if ((uint32_t)(now - s_last_data_ms) > APP_DATA_TIMEOUT) {
+    /* ---- 2. INTB 长时间不来 -> 故障 ---- */
+    if ((uint32_t)(now - s_last_intb_ms) > APP_INTB_TIMEOUT) {
         measure_fault();
     }
 
-    /* ---- 3. 周期上报 ---- */
+    /* ---- 3. OLED 刷新: 250ms 一次, 别把 I2C 占满 ---- */
+    if ((uint32_t)(now - s_last_oled_ms) >= APP_OLED_MS) {
+        s_last_oled_ms = now;
+        display_update();
+    }
+
+    /* ---- 4. 周期上报 ---- */
     send(s_out, protocol_tick(s_out, (int)sizeof(s_out), measure_latest(), now));
 
     board_feed_watchdog();

@@ -16,6 +16,8 @@
 ".\objects\board.o"
 ".\objects\hard_i2c.o"
 ".\objects\uart.o"
+".\objects\oled.o"
+".\objects\button.o"
 ".\objects\adc_temp.o"
 ".\objects\flash_param.o"
 ".\objects\ldc1614.o"

@@ -237,12 +237,13 @@ int ldc1614_init(uint16_t *device_id, uint16_t *manufacturer_id)
         return LDC_ERR_MUX;
     }
 
-    /* 8. CONFIG: 用芯片内部时钟(不用外部 40MHz), 并退出复位后的 Sleep Mode。 */
+    /* 8. CONFIG: 用外部 40MHz 有源晶振做参考时钟, 并退出复位后的 Sleep Mode。 */
     if (ldc1614_read_reg(LDC1614_REG_CONFIG, &v) != 0) {
         return LDC_ERR_CONFIG;
     }
-    // 清掉 SLEEP_MODE 和 REF_CLK_SRC: REF_CLK_SRC=0 就是芯片内部时钟, 最后写回寄存器
+    // 清掉 SLEEP_MODE, 再把 REF_CLK_SRC 置 1: 用外部 CLKIN(40MHz), 最后写回寄存器
     v &= (uint16_t)~(LDC1614_CONFIG_SLEEP_MODE | LDC1614_CONFIG_REF_CLK_SRC);
+    v |= LDC1614_CONFIG_REF_CLK_SRC;
     if (ldc1614_write_reg(LDC1614_REG_CONFIG, v) != 0) {
         return LDC_ERR_CONFIG;
     }
@@ -251,8 +252,8 @@ int ldc1614_init(uint16_t *device_id, uint16_t *manufacturer_id)
     if (ldc1614_read_reg(LDC1614_REG_CONFIG, &v) != 0) {
         return LDC_ERR_VERIFY;
     }
-    // 校验 CONFIG 寄存器, 确认 REF_CLK_SRC=0(内部时钟), SLEEP_MODE 位被清除
-    if ((v & LDC1614_CONFIG_REF_CLK_SRC) != 0u ||
+    // 校验 CONFIG 寄存器, 确认 REF_CLK_SRC=1(外部时钟), SLEEP_MODE 位被清除
+    if ((v & LDC1614_CONFIG_REF_CLK_SRC) == 0u ||
         (v & LDC1614_CONFIG_SLEEP_MODE) != 0u) {
         return LDC_ERR_VERIFY;
     }

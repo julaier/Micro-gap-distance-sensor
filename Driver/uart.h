@@ -1,8 +1,8 @@
 /*
- * uart.h - USART2 串口 (接外部 CH340 模块)
+ * uart.h - USART1 串口 (接外部 CH340 模块)
  *
- * PA2 = USART2_TX -> CH340 的 RXD
- * 当前只发送, 电脑不能发命令给单片机。
+ * PA9  = USART1_TX -> CH340 的 RXD
+ * PA10 = USART1_RX <- CH340 的 TXD
  * 3.3V TTL, 默认 115200 8N1。
  */
 #ifndef UART_H
@@ -15,5 +15,7 @@ void uart_init(uint32_t baud);
 void uart_write(const uint8_t *buf, uint16_t len);
 //发送字符串，遇到 '\0' 结束
 void uart_puts(const char *s);
+//非阻塞读一个字节: 读到返回 1, 没数据返回 0
+int uart_read_byte(uint8_t *b);
 
 #endif /* UART_H */
