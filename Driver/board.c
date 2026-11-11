@@ -1,8 +1,8 @@
 /*
  * board.c - 板级基础服务实现
  *
- * 时钟: HSE 8MHz -> PLL x9 -> 72MHz
- *       AHB = 72MHz, APB1 = 36MHz, APB2 = 72MHz, ADC = 12MHz
+ * 时钟: 内部HSI直接8MHz，不启用HSE或PLL
+ *       AHB/APB1/APB2 = 8MHz, ADC = 4MHz
  * 时基: SysTick 1ms
  * INTB: PB0 / EXTI0 下降沿
  *
@@ -40,9 +40,20 @@ void board_delay_ms(uint32_t ms)
 //延迟us，阻塞
 void board_delay_us(uint32_t us)
 {
-    while (us-- > 0u) {
-        volatile uint32_t i;
-        for (i = 0; i < 18u; i++) {   /* 约 1us @72MHz, 可按需微调 */
+    const uint32_t ticks_per_us = SystemCoreClock / 1000000u;
+    const uint32_t period = SysTick->LOAD + 1u;
+    while (us-- != 0u) {
+        if ((SysTick->CTRL & 1u) != 0u) {
+            uint32_t start = SysTick->VAL;
+            uint32_t elapsed;
+            do {
+                uint32_t now = SysTick->VAL;
+                elapsed = start >= now ? start - now : start + period - now;
+            } while (elapsed < ticks_per_us);
+        } else {
+            /* Only for a call before SysTick init; normal calls use counter. */
+            volatile uint32_t guard;
+            for (guard = 0u; guard <= ticks_per_us; guard++) {}
         }
     }
 }
@@ -71,77 +82,31 @@ int board_clock_is_72m(void)
     RCC_ClocksTypeDef clocks;
 
     RCC_GetClocksFreq(&clocks);
-    return (clocks.SYSCLK_Frequency == 72000000u) ? 1 : 0;
+    return (clocks.SYSCLK_Frequency == 72000000u &&
+            RCC_GetSYSCLKSource() == 0x08u &&
+            (RCC->CFGR & RCC_CFGR_PLLSRC) != 0u &&
+            RCC_GetFlagStatus(RCC_FLAG_HSERDY) != RESET &&
+            RCC_GetFlagStatus(RCC_FLAG_PLLRDY) != RESET) ? 1 : 0;
 }
-/* 试着切到外部 8MHz 晶振 x9 = 72MHz。
- * 0 = 成功; -1 = 晶振没起振或 PLL 没锁上, 此时保持 HSI 8MHz 不变。 */
-static int clock_try_hse72(void)
-{
-    uint32_t guard;
+/* This variant never attempts an external oscillator or PLL. */
 
-    RCC_HSEConfig(RCC_HSE_ON);
-
-    /* 等晶振起振: 计数等不到就放弃, 不能死等 */
-    for (guard = 0u; guard < 200000u; guard++) {
-        if (RCC_GetFlagStatus(RCC_FLAG_HSERDY) != RESET) {
-            break;
-        }
-    }
-    if (RCC_GetFlagStatus(RCC_FLAG_HSERDY) == RESET) {
-        RCC_HSEConfig(RCC_HSE_OFF);
-        return -1;/*晶振没起来, 继续用 HSI*/
-    }
-
-    /* HSE 起来了再配 PLL: Flash 延迟 -> 总线分频 -> PLL x9 = 72MHz */
-    FLASH_PrefetchBufferCmd(FLASH_PrefetchBuffer_Enable);
-    FLASH_SetLatency(FLASH_Latency_2);
-    RCC_HCLKConfig(RCC_SYSCLK_Div1);
-    RCC_PCLK2Config(RCC_HCLK_Div1);
-    RCC_PCLK1Config(RCC_HCLK_Div2);
-    RCC_ADCCLKConfig(RCC_PCLK2_Div6);
-    RCC_PLLConfig(RCC_PLLSource_HSE_Div1, RCC_PLLMul_9);
-    RCC_PLLCmd(ENABLE);
-
-    for (guard = 0u; guard < 200000u; guard++) {
-        if (RCC_GetFlagStatus(RCC_FLAG_PLLRDY) != RESET) {
-            break;
-        }
-    }
-    if (RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == RESET) {
-        RCC_PLLCmd(DISABLE);
-        RCC_HSEConfig(RCC_HSE_OFF);
-        return -1;/*PLL 没锁上, 继续用 HSI*/
-    }
-
-    RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
-    for (guard = 0u; guard < 200000u; guard++) {
-        if (RCC_GetSYSCLKSource() == 0x08u) {
-            break;
-        }
-    }
-    if (RCC_GetSYSCLKSource() != 0x08u) {
-        return -1;
-    }
-
-    SystemCoreClockUpdate();
-    return 0;
-}
-//滴答时钟初始化，72MHz
+// HSI8MHz初始化
 static void clock_init(void)
 {
-    /* 第一步: 先用内部 HSI 8MHz 起来, 这一步不依赖外部晶振, 保证程序一定能跑 */
     RCC_DeInit();
     RCC_HSICmd(ENABLE);
-    while (RCC_GetFlagStatus(RCC_FLAG_HSIRDY) == RESET) {
-    }
+    while (RCC_GetFlagStatus(RCC_FLAG_HSIRDY) == RESET) {}
     RCC_SYSCLKConfig(RCC_SYSCLKSource_HSI);
-    while (RCC_GetSYSCLKSource() != 0x00u) {
-    }
+    while (RCC_GetSYSCLKSource() != 0x00u) {}
+    RCC_PLLCmd(DISABLE);
+    RCC_HSEConfig(RCC_HSE_OFF);
+    RCC_HCLKConfig(RCC_SYSCLK_Div1);
+    RCC_PCLK1Config(RCC_HCLK_Div1);
+    RCC_PCLK2Config(RCC_HCLK_Div1);
+    RCC_ADCCLKConfig(RCC_PCLK2_Div2);
+    FLASH_SetLatency(FLASH_Latency_0);
+    FLASH_PrefetchBufferCmd(FLASH_PrefetchBuffer_Enable);
     SystemCoreClockUpdate();
-
-    /* 第二步: 再试着切到外部 8MHz 晶振 x9 = 72MHz。
-     * 晶振起不来或者 PLL 没锁上, 就用 HSI 继续跑, 绝不卡死。 */
-    (void)clock_try_hse72();
 }
 // INTB 中断初始化, PB0, 下降沿触发
 static void intb_init(void)
@@ -186,7 +151,7 @@ void board_reset(void)
 {
     NVIC_SystemReset();
 }
-// 上电初始化: 72MHz 时钟 -> 1ms 时基 -> INTB 中断。
+// 上电初始化: HSI8MHz -> 1ms时基 -> INTB中断。
 void board_init(void)
 {
     clock_init();
@@ -202,4 +167,14 @@ void board_init(void)
     IWDG_ReloadCounter();
     IWDG_Enable();
 #endif
+}
+
+int board_clock_is_hsi8(void)
+{
+    RCC_ClocksTypeDef clocks;
+    RCC_GetClocksFreq(&clocks);
+    return (clocks.SYSCLK_Frequency == 8000000u &&
+            RCC_GetSYSCLKSource() == 0x00u &&
+            RCC_GetFlagStatus(RCC_FLAG_HSIRDY) != RESET &&
+            (RCC->CR & (RCC_CR_HSEON | RCC_CR_PLLON)) == 0u) ? 1 : 0;
 }

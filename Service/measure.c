@@ -8,11 +8,11 @@
 
 /* 电脑不能发命令时, 调试参数直接在本文件修改。 */
 #define MEAS_USE_FLASH_PARAMS   0u      /* 0 = 不读旧 Flash 参数, 只用下面代码值 */
-#define MEAS_DEFAULT_ALARM_MM   0.800f  /* 报警阈值 */
+#define MEAS_DEFAULT_ALARM_MM   0.800f  /* 报警阈值(大于它报警) */
 #define MEAS_DEFAULT_WARN_MM    0.500f  /* 提醒阈值 */
 #define MEAS_DEFAULT_HYST_MM    0.050f  /* 迟滞 */
 #define MEAS_DEFAULT_TEMP_K     0.0f    /* 温补系数 */
-#define MEAS_DEFAULT_TEMP_REF_C 25.0f   /* 温补参考温度 */
+#define MEAS_DEFAULT_TEMP_REF_C 0.0f   /* 温补参考温度 */
 #define MEAS_DEFAULT_SWAP       0u      /* 0 = CH0/CH1, 1 = CH1/CH0 */
 
 /*
@@ -21,7 +21,7 @@
  *   再把 MEAS_CODE_CAL_POINTS 改成实际点数 (必须 >= 2)。
  *   点数不足 2 时, 测得距离会保持 0, 状态显示 UNCAL。
  */
-#define MEAS_CODE_CAL_POINTS    4       /* 当前使用的代码标定点个数, 0~9 */
+#define MEAS_CODE_CAL_POINTS    9       /* 当前使用的代码标定点个数, 0~9 */
 #if (MEAS_CODE_CAL_POINTS < 0) || (MEAS_CODE_CAL_POINTS > MEAS_MAX_POINTS)
 #error "MEAS_CODE_CAL_POINTS must be between 0 and MEAS_MAX_POINTS"
 #endif
@@ -47,12 +47,12 @@ typedef struct {
 } measure_params_t;
 /*9个标定点的参数更改在这里改*/
 static const float s_code_cal_gap[MEAS_MAX_POINTS] = {
-    0.0f,0.50f, 0.80f, 1.00f, 2.00f,
-    0.0f, 0.0f, 0.0f, 0.0f
+     0.0f,0.20f, 0.50f, 0.80f, 1.00f, 1.50f, 2.00f,3.00f,
+    4.50f,
 };
 static const float s_code_cal_ratio[MEAS_MAX_POINTS] = {
-    0.0f,1.01027f, 1.00940f, 1.00517f, 0.99091f,
-    0.0f, 0.0f, 0.0f, 0.0f
+     1.27603f,1.21035f,1.11205f, 1.05667f, 1.03229f, 0.99579f, 0.97820f,0.96220f,
+     0.95545f,
 };
 
 static void params_sort(measure_params_t *p);
@@ -410,6 +410,7 @@ static uint8_t level_with_hysteresis(const measure_params_t *p, uint8_t cur, flo
 
     switch (cur) {
     case MEAS_ST_NORMAL:
+        /* 距离越大越危险: 大于等于报警值 -> 报警, 大于等于提醒值 -> 提醒, 否则正常 */
         if (d >= p->alarm_mm) {
             return MEAS_ST_ALARM;
         }

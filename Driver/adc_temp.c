@@ -42,7 +42,7 @@ void adc_temp_init(void)
     volatile uint32_t i;
 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
-    RCC_ADCCLKConfig(RCC_PCLK2_Div6);
+    RCC_ADCCLKConfig(RCC_PCLK2_Div2);/* PCLK2=8MHz -> ADC=4MHz */
 
     ADC_StructInit(&adc);
     adc.ADC_Mode                = ADC_Mode_Independent;

@@ -8,7 +8,7 @@
 #define HARD_I2C_H
 
 #include <stdint.h>
-/* 初始化 I2C 外设，400kHz，复用开漏。 */
+/* 初始化 I2C 外设，100kHz，复用开漏。 */
 void hard_i2c_init(void);
 
 /* 调试用: bit0/1 = 内部下拉时 SCL/SDA 电平, bit2/3 = 内部上拉时 SCL/SDA 电平。 */

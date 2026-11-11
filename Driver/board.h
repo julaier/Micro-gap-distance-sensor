@@ -9,7 +9,7 @@
 
 #include <stdint.h>
 
-/* 上电初始化: 72MHz 时钟 -> 1ms 时基 -> INTB 中断。
+/* 上电初始化: 内部HSI 8MHz时钟 -> 1ms 时基 -> INTB 中断。
  * 必须在所有其它模块之前调用。 */
 void board_init(void);
 
@@ -19,7 +19,10 @@ uint32_t board_millis(void);
 void board_delay_ms(uint32_t ms);
 void board_delay_us(uint32_t us);
 
-/* 系统时钟当前是不是 72MHz; 0 表示退到了内部 HSI 8MHz */
+/* 当前构建使用board_hsi8.c，HSI 8MHz是正常目标配置。 */
+int board_clock_is_hsi8(void);
+
+/* 保留旧接口兼容性；本版正常返回0。 */
 int board_clock_is_72m(void);
 
 /* LDC1614 的 INTB 接 PB0, 下降沿中断。

@@ -1,5 +1,4 @@
 .\objects\app.o: ..\App\app.c
-.\objects\app.o: D:\keil32\ARM\ARMCC\Bin\..\include\string.h
 .\objects\app.o: ..\App\app.h
 .\objects\app.o: ..\Driver\board.h
 .\objects\app.o: D:\keil32\ARM\ARMCC\Bin\..\include\stdint.h
@@ -8,5 +7,6 @@
 .\objects\app.o: ..\Device\ldc1614.h
 .\objects\app.o: ..\Service\measure.h
 .\objects\app.o: ..\Service\protocol.h
-.\objects\app.o: ..\Driver\oled.h
+.\objects\app.o: ..\App\display.h
 .\objects\app.o: ..\Driver\button.h
+.\objects\app.o: ..\App\console.h

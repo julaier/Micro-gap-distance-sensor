@@ -1,7 +1,7 @@
 /*
  * hard_i2c.c - STM32F103 硬件 I2C1 主机实现
  *
- * SCL = PB6, SDA = PB7, 400kHz, 复用开漏。
+ * SCL = PB6, SDA = PB7, 100kHz, 复用开漏。
  * 使用 STM32F10x Standard Peripheral Library 的阻塞式收发流程，
  * 仅访问本工程需要的 LDC1614 寄存器。
  */
@@ -111,7 +111,7 @@ static void i2c_bus_recover(void)
 
     i2c_gpio_config(GPIO_Mode_AF_OD);
 }
-/* I2C 外设初始化，400kHz，复用开漏。 */
+/* I2C 外设初始化，100kHz，复用开漏。 */
 static void i2c_peripheral_init(void)
 {
     I2C_InitTypeDef i2c;
@@ -123,9 +123,9 @@ static void i2c_peripheral_init(void)
 
     I2C_DeInit(I2C1);
     I2C_StructInit(&i2c);
-    i2c.I2C_ClockSpeed          = 400000u;
+    i2c.I2C_ClockSpeed          = 100000u;
     i2c.I2C_Mode                = I2C_Mode_I2C;
-    // 50% 占空比，400kHz 时钟周期 2.5us，SCL 高电平时间 1.25us，低电平时间 1.25us。
+    // 标准模式 100kHz；APB1=8MHz 时 CCR=26，约 102kHz。
     i2c.I2C_DutyCycle           = I2C_DutyCycle_2;
     i2c.I2C_OwnAddress1         = 0u;
     i2c.I2C_Ack                 = I2C_Ack_Enable;

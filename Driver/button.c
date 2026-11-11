@@ -44,19 +44,19 @@ static uint8_t read_key(int idx)
 
     return ((idr & pin) != 0u) ? 1u : 0u;
 }
-
+// 扫描按键状态, 处理消抖和长按/短按事件
 void button_scan(uint32_t now_ms)
 {
     int i;
 
     for (i = 0; i < 2; i++) {
-        uint8_t raw = read_key(i);
-
+        uint8_t raw = read_key(i);//读原始电平, 1 = 松开, 0 = 按下
+        //如果原始电平变化了, 就更新原始电平和变化时间戳
         if (raw != s_raw[i]) {
-            s_raw[i] = raw;
+            s_raw[i] = raw;//更新原始电平
             s_change_ms[i] = now_ms;
         }
-
+        //如果原始电平和稳定电平不一样, 而且已经过了消抖时间, 就更新稳定电平
         if (raw != s_stable[i] &&
             (uint32_t)(now_ms - s_change_ms[i]) >= BTN_DEBOUNCE_MS) {
             s_stable[i] = raw;
@@ -69,7 +69,7 @@ void button_scan(uint32_t now_ms)
                 s_short_evt[i] = 1u;
             }
         }
-
+        //如果稳定电平是按下, 而且还没报过长按, 而且已经过了长按时间, 就报长按
         if (s_stable[i] == 0u && s_long_sent[i] == 0u &&
             (uint32_t)(now_ms - s_press_ms[i]) >= BTN_LONG_MS) {
             s_long_evt[i] = 1u;
@@ -77,7 +77,7 @@ void button_scan(uint32_t now_ms)
         }
     }
 }
-
+// 读按键短按事件, 读到就清掉
 int button_short_press(int idx)
 {
     if (idx < 0 || idx > 1) {

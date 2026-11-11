@@ -485,6 +485,26 @@
               <FileType>5</FileType>
               <FilePath>..\App\app.h</FilePath>
             </File>
+            <File>
+              <FileName>display.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\display.c</FilePath>
+            </File>
+            <File>
+              <FileName>display.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\App\display.h</FilePath>
+            </File>
+            <File>
+              <FileName>console.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\console.c</FilePath>
+            </File>
+            <File>
+              <FileName>console.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\App\console.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

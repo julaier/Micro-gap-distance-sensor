@@ -17,6 +17,9 @@
 
 static uint8_t s_fb[OLED_WIDTH * OLED_HEIGHT / 8u];
 
+/* 实际使用的 I2C 地址: 初始化时会先在 0x3C / 0x3D 里试一遍 */
+static uint8_t s_addr = OLED_I2C_ADDR;
+
 /* 5x7 点阵: 每个字符 5 列, 每列 bit0..bit6 从上到下 */
 static const uint8_t FONT5X7[][5] = {
     /* 0-9 */
@@ -79,11 +82,12 @@ static int write_cmds(const uint8_t *cmds, uint16_t n)
     for (i = 0; i < n; i++) {
         buf[i + 1u] = cmds[i];
     }
-    return hard_i2c_write(OLED_I2C_ADDR, buf, (uint16_t)(n + 1u));
+    return hard_i2c_write(s_addr, buf, (uint16_t)(n + 1u));
 }
 
 int oled_init(void)
 {
+    static const uint8_t addr_try[2] = {0x3Cu, 0x3Du};
     static const uint8_t init[] = {
         0xAE,       /* display off */
         0xD5, 0x80, /* clock divide */
@@ -102,14 +106,20 @@ int oled_init(void)
         0xA6,       /* normal display */
         0xAF        /* display on */
     };
+    uint8_t i;
 
-    if (write_cmds(init, (uint16_t)sizeof(init)) != 0) {
-        return -1;/*屏幕没应答: 地址不对或者没接*/
+    /* 0x3C 和 0x3D 都试一下, 哪个应答就用哪个 */
+    for (i = 0u; i < 2u; i++) {
+        s_addr = addr_try[i];
+        if (write_cmds(init, (uint16_t)sizeof(init)) == 0) {
+            oled_clear();
+            oled_flush();
+            return 0;
+        }
     }
 
-    oled_clear();
-    oled_flush();
-    return 0;
+    s_addr = OLED_I2C_ADDR;
+    return -1;/*屏幕没应答: 地址不对或者没接*/
 }
 
 void oled_clear(void)
@@ -219,7 +229,7 @@ void oled_flush(void)
         for (i = 0; i < OLED_WIDTH; i++) {
             buf[i + 1u] = s_fb[(uint16_t)page * OLED_WIDTH + i];
         }
-        if (hard_i2c_write(OLED_I2C_ADDR, buf, (uint16_t)(OLED_WIDTH + 1u)) != 0) {
+        if (hard_i2c_write(s_addr, buf, (uint16_t)(OLED_WIDTH + 1u)) != 0) {
             return;
         }
     }

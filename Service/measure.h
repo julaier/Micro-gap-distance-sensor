@@ -11,7 +11,7 @@
 
 #include <stdint.h>
 
-#define MEAS_MAX_POINTS   9/* 标定点最大个数, 1~9 个 */
+#define MEAS_MAX_POINTS   15/* 标定点最大个数, 1~15 个 */
 
 /* 状态码, 也是串口 $D / $R 帧的最后一个字段 */
 #define MEAS_ST_NORMAL    0u   /* 正常 */

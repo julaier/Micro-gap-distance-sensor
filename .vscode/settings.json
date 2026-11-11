@@ -15,5 +15,13 @@
     "search.exclude": {
         "**/MDK-ARM/Objects": true,
         "**/MDK-ARM/Listings": true
-    }
+    },
+    "editor.quickSuggestions": {
+        "other": true,
+        "comments": true,
+        "strings": true
+    },
+    "editor.suggest.showWords": true,
+    "editor.wordBasedSuggestions": "matchingDocuments",
+    "editor.snippetSuggestions": "top"
 }
