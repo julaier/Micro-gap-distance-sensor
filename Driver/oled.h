@@ -2,7 +2,7 @@
  * oled.h - 0.96 寸 OLED (SSD1306, 128x64, I2C) 驱动
  *
  * 型号: HS96L03W2C03
- * 接法: 和 LDC1614 共用 I2C1 (SCL = PB6, SDA = PB7)
+ * 接法: 和 LDC1614 共用软件 I2C (SCL = PB7, SDA = PB6，新板不启用 OLED)
  * 7 位地址默认 0x3C (模块背面电阻可改 0x3D)
  */
 #ifndef OLED_H

@@ -1,0 +1,14 @@
+--cpu Cortex-M0+
+".\objects\startup_stm32c011xx.o"
+".\objects\system_stm32c0xx.o"
+".\objects\ack_port.o"
+".\objects\main.o"
+".\objects\f103_flow.o"
+".\objects\wake_i2c.o"
+".\objects\test_board.o"
+".\objects\ldc1614.o"
+".\objects\f103_i2c_adapter.o"
+--strict --scatter ".\Objects\LDC1614_F103_FLOW_SW.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list ".\Listings\LDC1614_F103_FLOW_SW.map" -o .\Objects\LDC1614_F103_FLOW_SW.axf

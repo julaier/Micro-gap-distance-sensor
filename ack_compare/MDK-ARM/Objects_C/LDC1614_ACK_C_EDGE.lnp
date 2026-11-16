@@ -1,0 +1,12 @@
+--cpu Cortex-M0+
+".\objects_c\startup_stm32c011xx.o"
+".\objects_c\system_stm32c0xx.o"
+".\objects_c\ack_port.o"
+".\objects_c\main.o"
+".\objects_c\wake_diag.o"
+".\objects_c\wake_i2c.o"
+".\objects_c\test_board.o"
+--strict --scatter ".\Objects_C\LDC1614_ACK_C_EDGE.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list ".\Listings_C\LDC1614_ACK_C_EDGE.map" -o .\Objects_C\LDC1614_ACK_C_EDGE.axf

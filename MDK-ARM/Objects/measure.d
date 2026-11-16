@@ -1,5 +1,3 @@
-.\objects\measure.o: ..\Service\measure.c
-.\objects\measure.o: D:\keil32\ARM\ARMCC\Bin\..\include\string.h
-.\objects\measure.o: ..\Service\measure.h
-.\objects\measure.o: D:\keil32\ARM\ARMCC\Bin\..\include\stdint.h
-.\objects\measure.o: ..\Driver\flash_param.h
+./objects/measure.o: ../Service/measure.c \
+  D:\keil32\ARM\ARMCLANG\Bin\..\include\string.h ../Service/measure.h \
+  D:\keil32\ARM\ARMCLANG\Bin\..\include\stdint.h ../Driver\flash_param.h

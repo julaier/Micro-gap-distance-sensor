@@ -2,13 +2,13 @@
  * oled.c - SSD1306 128x64 OLED 驱动 (I2C)
  *
  * 型号: HS96L03W2C03 (0.96 寸, SSD1306 兼容, 128x64)
- * 和 LDC1614 共用 I2C1: SCL = PB6, SDA = PB7
+ * 和 LDC1614 共用软件 I2C: SCL = PB7, SDA = PB6（新板不启用 OLED）
  *
  * 显存取 1KB 内存, 画完之后 oled_flush() 一次刷到屏幕。
  */
 
 #include <string.h>
-#include "stm32f10x.h"
+#include "stm32c0xx.h"
 #include "oled.h"
 #include "hard_i2c.h"
 

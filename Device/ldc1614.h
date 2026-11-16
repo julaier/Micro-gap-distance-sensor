@@ -2,11 +2,11 @@
  * ldc1614.h - LDC1614RGHR 驱动 (电气接口层)
  *
  * 本板接法:
- *   SCL = PB6, SDA = PB7 (4.7K 上拉, 见 hard_i2c.h)
+ *   SCL = PB7, SDA = PB6 (软件 I2C，4.7K 上拉, 见 hard_i2c.h)
  *   ADDR = GND        -> 7 位地址 0x2A
  *   SD   = GND        -> 正常工作 (SD 高才是 shutdown)
  *   CLKIN <- 40MHz 有源晶振
- *   INTB = PB0        -> 推挽输出, 无需上拉, 接 EXTI0
+ *   INTB = PA4        -> 推挽输出, 无需上拉, 接 EXTI4_15
  *   CH0 / CH1         -> 板载两路 PCB 平面线圈 (测量 / 参考)
  *   IN2 / IN3         -> 并接 GND, 不参与扫描
  */
@@ -14,8 +14,13 @@
 #define LDC1614_H
 
 #include <stdint.h>
+#include "hard_i2c.h"
 
 #define LDC1614_I2C_ADDR   0x2Au
+#define LDC1614_ERR_CONFIG  (-17)
+#define LDC1614_ERR_CONFIG_HOLD (-18)
+#define LDC1614_ERR_NO_DATA (-20)
+#define LDC1614_STATUS_CH01_UNREAD 0x000Cu
 
 /* 寄存器地址 */
 #define LDC1614_REG_DATA_CH0_MSB        0x00u
@@ -88,9 +93,34 @@ int  ldc1614_read_reg(uint8_t reg, uint16_t *value);
 
 /* 完整初始化, 成功返回 0; 失败返回负数 (见 .c 里的 ERR_xxx) */
 int  ldc1614_init(uint16_t *device_id, uint16_t *manufacturer_id);
+/* Same full reset/configuration, changing only REF_CLK_SRC. external=0 uses
+ * the LDC internal reference, NOT the STM32 system clock. */
+int  ldc1614_init_clock(uint16_t *device_id, uint16_t *manufacturer_id,
+                       int external);
+
+/* Initialization-only write/readback report. read_rc=-4 means not attempted.
+ * bus preserves the first failing write/read, before another read replaces it. */
+typedef struct {
+    uint8_t reg;
+    uint16_t expected;
+    uint16_t actual;
+    int write_rc;
+    int read_rc;
+    int result;
+    uint8_t nack_verified;
+    hard_i2c_diag_t bus;
+} ldc1614_init_step_t;
+typedef void (*ldc1614_init_trace_t)(const ldc1614_init_step_t *step);
+void ldc1614_set_init_trace(ldc1614_init_trace_t trace);
+void ldc1614_get_init_bus_diag(hard_i2c_diag_t *diag);
 
 /* 读一次双通道转换结果; 同时取回两通道的错误标志 (可为 NULL) */
 int  ldc1614_read_raw(uint32_t *ch0, uint32_t *ch1, uint16_t *err_flags);
+/* 0=fresh nonzero pair without DATA error flags; 1=not both channels ready;
+ * -20=invalid pair; other negative values=bus failure. Reading an unchanged
+ * DATA register without UNREADCONV must not refresh the application's timeout. */
+int  ldc1614_read_fresh_raw(uint32_t *ch0, uint32_t *ch1,
+                           uint16_t *err_flags, uint16_t *status);
 
 int  ldc1614_read_status(uint16_t *status);
 

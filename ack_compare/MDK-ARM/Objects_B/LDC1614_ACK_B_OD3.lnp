@@ -1,0 +1,12 @@
+--cpu Cortex-M0+
+".\objects_b\startup_stm32c011xx.o"
+".\objects_b\system_stm32c0xx.o"
+".\objects_b\ack_port.o"
+".\objects_b\main.o"
+".\objects_b\wake_diag.o"
+".\objects_b\wake_i2c.o"
+".\objects_b\test_board.o"
+--strict --scatter ".\Objects_B\LDC1614_ACK_B_OD3.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list ".\Listings_B\LDC1614_ACK_B_OD3.map" -o .\Objects_B\LDC1614_ACK_B_OD3.axf

@@ -1,64 +1,65 @@
 /*
- * uart.c - USART1 收发实现 (查询发送)
+ * uart.c - STM32C011 USART2 查询收发
  *
- * PA9  = USART1_TX -> CH340 的 RXD
- * PA10 = USART1_RX <- CH340 的 TXD
- * 本文件使用 STM32F10x Standard Peripheral Library USART/GPIO/RCC API。
+ * PA2 = USART2_TX (AF1) -> CH340 RXD
+ * PA3 = USART2_RX (AF1) <- CH340 TXD
  */
 
 #include <string.h>
-#include "stm32f10x.h"
+#include "stm32c0xx.h"
+#include "stm32c0xx_ll_bus.h"
+#include "stm32c0xx_ll_gpio.h"
+#include "stm32c0xx_ll_rcc.h"
+#include "stm32c0xx_ll_usart.h"
 #include "uart.h"
 
-//baud = 115200, 8N1, PA9 = TX / PA10 = RX
 void uart_init(uint32_t baud)
 {
-    GPIO_InitTypeDef gpio;
-    USART_InitTypeDef usart;
+    LL_GPIO_InitTypeDef gpio = {0};
+    LL_USART_InitTypeDef usart = {0};
 
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_USART1, ENABLE);
+    LL_IOP_GRP1_EnableClock(LL_IOP_GRP1_PERIPH_GPIOA);
+    LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_USART2);
+    gpio.Pin = LL_GPIO_PIN_2 | LL_GPIO_PIN_3;
+    gpio.Mode = LL_GPIO_MODE_ALTERNATE;
+    gpio.Speed = LL_GPIO_SPEED_FREQ_HIGH;
+    gpio.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+    gpio.Pull = LL_GPIO_PULL_UP;
+    gpio.Alternate = LL_GPIO_AF_1;
+    LL_GPIO_Init(GPIOA, &gpio);
 
-    /* PA9 = 复用推挽输出 (TX) */
-    GPIO_StructInit(&gpio);
-    gpio.GPIO_Pin   = GPIO_Pin_9;
-    gpio.GPIO_Mode  = GPIO_Mode_AF_PP;
-    gpio.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOA, &gpio);
+    usart.PrescalerValue = LL_USART_PRESCALER_DIV1;
+    usart.BaudRate = baud;
+    usart.DataWidth = LL_USART_DATAWIDTH_8B;
+    usart.StopBits = LL_USART_STOPBITS_1;
+    usart.Parity = LL_USART_PARITY_NONE;
+    usart.TransferDirection = LL_USART_DIRECTION_TX_RX;
+    usart.HardwareFlowControl = LL_USART_HWCONTROL_NONE;
+    usart.OverSampling = LL_USART_OVERSAMPLING_16;
+    LL_USART_Init(USART2, &usart);
+    LL_USART_DisableFIFO(USART2);
+    LL_USART_ConfigAsyncMode(USART2);
+    LL_USART_Enable(USART2);
 
-    /* PA10 = 浮空输入 (RX) */
-    gpio.GPIO_Pin   = GPIO_Pin_10;
-    gpio.GPIO_Mode  = GPIO_Mode_IN_FLOATING;
-    GPIO_Init(GPIOA, &gpio);
-
-    USART_StructInit(&usart);
-    usart.USART_BaudRate            = baud;
-    usart.USART_WordLength          = USART_WordLength_8b;
-    usart.USART_StopBits            = USART_StopBits_1;
-    usart.USART_Parity              = USART_Parity_No;
-    usart.USART_Mode                = USART_Mode_Rx | USART_Mode_Tx;
-    usart.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-    USART_Init(USART1, &usart);
-    USART_Cmd(USART1, ENABLE);
+    while ((LL_USART_IsActiveFlag_TEACK(USART2) == 0u) ||
+           (LL_USART_IsActiveFlag_REACK(USART2) == 0u)) {
+    }
 }
 
-//发送数据，等待发送完成
 void uart_write(const uint8_t *buf, uint16_t len)
 {
     uint16_t i;
 
-    for (i = 0; i < len; i++) {
-        // 等待发送缓冲空
-        while (USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET) {
+    for (i = 0u; i < len; i++) {
+        while (LL_USART_IsActiveFlag_TXE(USART2) == 0u) {
         }
-        USART_SendData(USART1, buf[i]);
+        LL_USART_TransmitData8(USART2, buf[i]);
     }
 
-    // 等待最后一个字节真正发送完成
-    while (USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET) {
+    while (LL_USART_IsActiveFlag_TC(USART2) == 0u) {
     }
 }
 
-//发送字符串，遇到 '\0' 结束
 void uart_puts(const char *s)
 {
     if (s == 0) {
@@ -67,16 +68,15 @@ void uart_puts(const char *s)
     uart_write((const uint8_t *)s, (uint16_t)strlen(s));
 }
 
-//非阻塞读一个字节: 读到返回 1, 没数据返回 0
 int uart_read_byte(uint8_t *b)
 {
-    if (USART_GetFlagStatus(USART1, USART_FLAG_RXNE) == RESET) {
+    if (LL_USART_IsActiveFlag_RXNE(USART2) == 0u) {
         return 0;
     }
     if (b != 0) {
-        *b = (uint8_t)USART_ReceiveData(USART1);
+        *b = LL_USART_ReceiveData8(USART2);
     } else {
-        (void)USART_ReceiveData(USART1);
+        (void)LL_USART_ReceiveData8(USART2);
     }
     return 1;
 }

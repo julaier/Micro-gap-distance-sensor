@@ -1,0 +1,85 @@
+Dependencies for Project 'LDC1614_F103_Margin_STLink', Target 'LDC1614_F103_MARGIN_SW': (DO NOT MODIFY !)
+F (../../Startup/startup_stm32c011xx.s)(0x6AF4324B)(--cpu Cortex-M0+ -g-I.\RTE\_LDC1614_F103_MARGIN_SW-ID:\keil32\ARM\CMSIS\Include--pd "__UVISION_VERSION SETA 524"--pd "STM32C011xx SETA 1"--list .\listings_margin\startup_stm32c011xx.lst--xref -o .\objects_margin\startup_stm32c011xx.o--depend .\objects_margin\startup_stm32c011xx.d)
+F (../../CMSIS/system_stm32c0xx.c)(0x6AF4324B)(-xc -std=c11 --target=arm-arm-none-eabi -mcpu=cortex-m0plus -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-3 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -I ../App -I ../Device -I ../Driver -I ../../ack_compare/Driver -I ../../test/Driver -I ../../Drivers/STM32C0xx_HAL_Driver/Inc -I ../../Drivers/CMSIS/Device/ST/STM32C0xx/Include -I ../../Drivers/CMSIS/Include-I./RTE/_LDC1614_F103_MARGIN_SW-ID:/keil32/ARM/CMSIS/Include-D__UVISION_VERSION="524" -DSTM32C011xx -DMARGIN_I2C="1" -DACK_COMPARE_PROFILE="1" -DUSE_FULL_LL_DRIVER -DHSE_VALUE="8000000" -DHSE_STARTUP_TIMEOUT="100" -DLSE_STARTUP_TIMEOUT="5000" -DLSE_VALUE="32768" -DEXTERNAL_CLOCK_VALUE="12288000" -DHSI_VALUE="48000000" -DLSI_VALUE="32000" -DVDD_VALUE="3300" -DPREFETCH_ENABLE="0" -DINSTRUCTION_CACHE_ENABLE="1" -DDATA_CACHE_ENABLE="1" -DSTM32C011xx-o ./objects_margin/system_stm32c0xx.o -MD)
+I (..\..\Drivers\CMSIS\Device\ST\STM32C0xx\Include\stm32c0xx.h)(0x6AF4324B)
+I (..\..\Drivers\CMSIS\Device\ST\STM32C0xx\Include\stm32c011xx.h)(0x6AF4324B)
+I (..\..\Drivers\CMSIS\Include\core_cm0plus.h)(0x6AF431F4)
+I (D:\keil32\ARM\ARMCLANG\include\stdint.h)(0x588CAFD2)
+I (..\..\Drivers\CMSIS\Include\cmsis_version.h)(0x6AF431F4)
+I (..\..\Drivers\CMSIS\Include\cmsis_compiler.h)(0x6AF431F4)
+I (..\..\Drivers\CMSIS\Include\cmsis_armclang_ltm.h)(0x6AF431F4)
+I (..\..\Drivers\CMSIS\Include\mpu_armv7.h)(0x6AF431F4)
+I (..\..\Drivers\CMSIS\Device\ST\STM32C0xx\Include\system_stm32c0xx.h)(0x6AF4324B)
+F (../App/main.c)(0x6AF865E5)(-xc -std=c11 --target=arm-arm-none-eabi -mcpu=cortex-m0plus -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-3 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -I ../App -I ../Device -I ../Driver -I ../../ack_compare/Driver -I ../../test/Driver -I ../../Drivers/STM32C0xx_HAL_Driver/Inc -I ../../Drivers/CMSIS/Device/ST/STM32C0xx/Include -I ../../Drivers/CMSIS/Include-I./RTE/_LDC1614_F103_MARGIN_SW-ID:/keil32/ARM/CMSIS/Include-D__UVISION_VERSION="524" -DSTM32C011xx -DMARGIN_I2C="1" -DACK_COMPARE_PROFILE="1" -DUSE_FULL_LL_DRIVER -DHSE_VALUE="8000000" -DHSE_STARTUP_TIMEOUT="100" -DLSE_STARTUP_TIMEOUT="5000" -DLSE_VALUE="32768" -DEXTERNAL_CLOCK_VALUE="12288000" -DHSI_VALUE="48000000" -DLSI_VALUE="32000" -DVDD_VALUE="3300" -DPREFETCH_ENABLE="0" -DINSTRUCTION_CACHE_ENABLE="1" -DDATA_CACHE_ENABLE="1" -DSTM32C011xx-o ./objects_margin/main.o -MD)
+I (..\..\test\Driver\test_board.h)(0x6AF6BCDE)
+I (D:\keil32\ARM\ARMCLANG\include\stdint.h)(0x588CAFD2)
+I (..\App\f103_flow.h)(0x6AF85AE4)
+I (..\..\Drivers\CMSIS\Device\ST\STM32C0xx\Include\stm32c0xx.h)(0x6AF4324B)
+I (..\..\Drivers\CMSIS\Device\ST\STM32C0xx\Include\stm32c011xx.h)(0x6AF4324B)
+I (..\..\Drivers\CMSIS\Include\core_cm0plus.h)(0x6AF431F4)
+I (..\..\Drivers\CMSIS\Include\cmsis_version.h)(0x6AF431F4)
+I (..\..\Drivers\CMSIS\Include\cmsis_compiler.h)(0x6AF431F4)
+I (..\..\Drivers\CMSIS\Include\cmsis_armclang_ltm.h)(0x6AF431F4)
+I (..\..\Drivers\CMSIS\Include\mpu_armv7.h)(0x6AF431F4)
+I (..\..\Drivers\CMSIS\Device\ST\STM32C0xx\Include\system_stm32c0xx.h)(0x6AF4324B)
+I (..\Driver\margin_i2c.h)(0x6AF8659E)
+I (..\..\ack_compare\Driver\wake_i2c.h)(0x6AF84F3C)
+I (..\..\test\Driver\test_i2c.h)(0x6AF6BCDE)
+F (../App/f103_flow.c)(0x6AF865E5)(-xc -std=c11 --target=arm-arm-none-eabi -mcpu=cortex-m0plus -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-3 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -I ../App -I ../Device -I ../Driver -I ../../ack_compare/Driver -I ../../test/Driver -I ../../Drivers/STM32C0xx_HAL_Driver/Inc -I ../../Drivers/CMSIS/Device/ST/STM32C0xx/Include -I ../../Drivers/CMSIS/Include-I./RTE/_LDC1614_F103_MARGIN_SW-ID:/keil32/ARM/CMSIS/Include-D__UVISION_VERSION="524" -DSTM32C011xx -DMARGIN_I2C="1" -DACK_COMPARE_PROFILE="1" -DUSE_FULL_LL_DRIVER -DHSE_VALUE="8000000" -DHSE_STARTUP_TIMEOUT="100" -DLSE_STARTUP_TIMEOUT="5000" -DLSE_VALUE="32768" -DEXTERNAL_CLOCK_VALUE="12288000" -DHSI_VALUE="48000000" -DLSI_VALUE="32000" -DVDD_VALUE="3300" -DPREFETCH_ENABLE="0" -DINSTRUCTION_CACHE_ENABLE="1" -DDATA_CACHE_ENABLE="1" -DSTM32C011xx-o ./objects_margin/f103_flow.o -MD)
+I (..\App\f103_flow.h)(0x6AF85AE4)
+I (D:\keil32\ARM\ARMCLANG\include\stdint.h)(0x588CAFD2)
+I (..\Driver\flow_bus.h)(0x6AF85AE3)
+I (..\..\ack_compare\Driver\wake_i2c.h)(0x6AF84F3C)
+I (..\..\test\Driver\test_i2c.h)(0x6AF6BCDE)
+I (..\Device\ldc1614.h)(0x6AF85AE2)
+I (..\..\test\Driver\test_board.h)(0x6AF6BCDE)
+F (../Driver/margin_i2c.c)(0x6AF86744)(-xc -std=c11 --target=arm-arm-none-eabi -mcpu=cortex-m0plus -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-3 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -I ../App -I ../Device -I ../Driver -I ../../ack_compare/Driver -I ../../test/Driver -I ../../Drivers/STM32C0xx_HAL_Driver/Inc -I ../../Drivers/CMSIS/Device/ST/STM32C0xx/Include -I ../../Drivers/CMSIS/Include-I./RTE/_LDC1614_F103_MARGIN_SW-ID:/keil32/ARM/CMSIS/Include-D__UVISION_VERSION="524" -DSTM32C011xx -DMARGIN_I2C="1" -DACK_COMPARE_PROFILE="1" -DUSE_FULL_LL_DRIVER -DHSE_VALUE="8000000" -DHSE_STARTUP_TIMEOUT="100" -DLSE_STARTUP_TIMEOUT="5000" -DLSE_VALUE="32768" -DEXTERNAL_CLOCK_VALUE="12288000" -DHSI_VALUE="48000000" -DLSI_VALUE="32000" -DVDD_VALUE="3300" -DPREFETCH_ENABLE="0" -DINSTRUCTION_CACHE_ENABLE="1" -DDATA_CACHE_ENABLE="1" -DSTM32C011xx-o ./objects_margin/margin_i2c.o -MD)
+I (..\Driver\margin_i2c.h)(0x6AF8659E)
+I (..\..\ack_compare\Driver\wake_i2c.h)(0x6AF84F3C)
+I (..\..\test\Driver\test_i2c.h)(0x6AF6BCDE)
+I (D:\keil32\ARM\ARMCLANG\include\stdint.h)(0x588CAFD2)
+I (..\Driver\margin_port.h)(0x6AF8659E)
+I (..\..\Drivers\CMSIS\Device\ST\STM32C0xx\Include\stm32c0xx.h)(0x6AF4324B)
+I (..\..\Drivers\CMSIS\Device\ST\STM32C0xx\Include\stm32c011xx.h)(0x6AF4324B)
+I (..\..\Drivers\CMSIS\Include\core_cm0plus.h)(0x6AF431F4)
+I (..\..\Drivers\CMSIS\Include\cmsis_version.h)(0x6AF431F4)
+I (..\..\Drivers\CMSIS\Include\cmsis_compiler.h)(0x6AF431F4)
+I (..\..\Drivers\CMSIS\Include\cmsis_armclang_ltm.h)(0x6AF431F4)
+I (..\..\Drivers\CMSIS\Include\mpu_armv7.h)(0x6AF431F4)
+I (..\..\Drivers\CMSIS\Device\ST\STM32C0xx\Include\system_stm32c0xx.h)(0x6AF4324B)
+I (..\..\test\Driver\test_board.h)(0x6AF6BCDE)
+F (../../test/Driver/test_board.c)(0x6AF6BCDE)(-xc -std=c11 --target=arm-arm-none-eabi -mcpu=cortex-m0plus -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-3 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -I ../App -I ../Device -I ../Driver -I ../../ack_compare/Driver -I ../../test/Driver -I ../../Drivers/STM32C0xx_HAL_Driver/Inc -I ../../Drivers/CMSIS/Device/ST/STM32C0xx/Include -I ../../Drivers/CMSIS/Include-I./RTE/_LDC1614_F103_MARGIN_SW-ID:/keil32/ARM/CMSIS/Include-D__UVISION_VERSION="524" -DSTM32C011xx -DMARGIN_I2C="1" -DACK_COMPARE_PROFILE="1" -DUSE_FULL_LL_DRIVER -DHSE_VALUE="8000000" -DHSE_STARTUP_TIMEOUT="100" -DLSE_STARTUP_TIMEOUT="5000" -DLSE_VALUE="32768" -DEXTERNAL_CLOCK_VALUE="12288000" -DHSI_VALUE="48000000" -DLSI_VALUE="32000" -DVDD_VALUE="3300" -DPREFETCH_ENABLE="0" -DINSTRUCTION_CACHE_ENABLE="1" -DDATA_CACHE_ENABLE="1" -DSTM32C011xx-o ./objects_margin/test_board.o -MD)
+I (..\..\Drivers\CMSIS\Device\ST\STM32C0xx\Include\stm32c0xx.h)(0x6AF4324B)
+I (..\..\Drivers\CMSIS\Device\ST\STM32C0xx\Include\stm32c011xx.h)(0x6AF4324B)
+I (..\..\Drivers\CMSIS\Include\core_cm0plus.h)(0x6AF431F4)
+I (D:\keil32\ARM\ARMCLANG\include\stdint.h)(0x588CAFD2)
+I (..\..\Drivers\CMSIS\Include\cmsis_version.h)(0x6AF431F4)
+I (..\..\Drivers\CMSIS\Include\cmsis_compiler.h)(0x6AF431F4)
+I (..\..\Drivers\CMSIS\Include\cmsis_armclang_ltm.h)(0x6AF431F4)
+I (..\..\Drivers\CMSIS\Include\mpu_armv7.h)(0x6AF431F4)
+I (..\..\Drivers\CMSIS\Device\ST\STM32C0xx\Include\system_stm32c0xx.h)(0x6AF4324B)
+I (..\..\Drivers\STM32C0xx_HAL_Driver\Inc\stm32c0xx_ll_rcc.h)(0x6AF4324B)
+I (..\..\Drivers\STM32C0xx_HAL_Driver\Inc\stm32c0xx_ll_system.h)(0x6AF4324B)
+I (..\..\test\Driver\test_board.h)(0x6AF6BCDE)
+F (../App/f103_flow.h)(0x6AF85AE4)()
+F (../../ack_compare/Driver/wake_i2c.h)(0x6AF84F3C)()
+F (../../test/Driver/test_board.h)(0x6AF6BCDE)()
+F (../../test/Driver/test_i2c.h)(0x6AF6BCDE)()
+F (../README_Margin.md)(0x6AF867BD)()
+F (../Device/ldc1614.c)(0x6AF85AE2)(-xc -std=c11 --target=arm-arm-none-eabi -mcpu=cortex-m0plus -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-3 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -I ../App -I ../Device -I ../Driver -I ../../ack_compare/Driver -I ../../test/Driver -I ../../Drivers/STM32C0xx_HAL_Driver/Inc -I ../../Drivers/CMSIS/Device/ST/STM32C0xx/Include -I ../../Drivers/CMSIS/Include-I./RTE/_LDC1614_F103_MARGIN_SW-ID:/keil32/ARM/CMSIS/Include-D__UVISION_VERSION="524" -DSTM32C011xx -DMARGIN_I2C="1" -DACK_COMPARE_PROFILE="1" -DUSE_FULL_LL_DRIVER -DHSE_VALUE="8000000" -DHSE_STARTUP_TIMEOUT="100" -DLSE_STARTUP_TIMEOUT="5000" -DLSE_VALUE="32768" -DEXTERNAL_CLOCK_VALUE="12288000" -DHSI_VALUE="48000000" -DLSI_VALUE="32000" -DVDD_VALUE="3300" -DPREFETCH_ENABLE="0" -DINSTRUCTION_CACHE_ENABLE="1" -DDATA_CACHE_ENABLE="1" -DSTM32C011xx-o ./objects_margin/ldc1614.o -MD)
+I (..\Device\ldc1614.h)(0x6AF85AE2)
+I (D:\keil32\ARM\ARMCLANG\include\stdint.h)(0x588CAFD2)
+I (..\Driver\hard_i2c.h)(0x6AF85AE3)
+I (..\Driver\board.h)(0x6AF85AE3)
+I (..\..\test\Driver\test_board.h)(0x6AF6BCDE)
+F (../Device/ldc1614.h)(0x6AF85AE2)()
+F (../Driver/f103_i2c_adapter.c)(0x6AF85AE4)(-xc -std=c11 --target=arm-arm-none-eabi -mcpu=cortex-m0plus -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-3 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -I ../App -I ../Device -I ../Driver -I ../../ack_compare/Driver -I ../../test/Driver -I ../../Drivers/STM32C0xx_HAL_Driver/Inc -I ../../Drivers/CMSIS/Device/ST/STM32C0xx/Include -I ../../Drivers/CMSIS/Include-I./RTE/_LDC1614_F103_MARGIN_SW-ID:/keil32/ARM/CMSIS/Include-D__UVISION_VERSION="524" -DSTM32C011xx -DMARGIN_I2C="1" -DACK_COMPARE_PROFILE="1" -DUSE_FULL_LL_DRIVER -DHSE_VALUE="8000000" -DHSE_STARTUP_TIMEOUT="100" -DLSE_STARTUP_TIMEOUT="5000" -DLSE_VALUE="32768" -DEXTERNAL_CLOCK_VALUE="12288000" -DHSI_VALUE="48000000" -DLSI_VALUE="32000" -DVDD_VALUE="3300" -DPREFETCH_ENABLE="0" -DINSTRUCTION_CACHE_ENABLE="1" -DDATA_CACHE_ENABLE="1" -DSTM32C011xx-o ./objects_margin/f103_i2c_adapter.o -MD)
+I (..\Driver\hard_i2c.h)(0x6AF85AE3)
+I (D:\keil32\ARM\ARMCLANG\include\stdint.h)(0x588CAFD2)
+I (..\Driver\flow_bus.h)(0x6AF85AE3)
+I (..\..\ack_compare\Driver\wake_i2c.h)(0x6AF84F3C)
+I (..\..\test\Driver\test_i2c.h)(0x6AF6BCDE)
+I (..\..\test\Driver\test_board.h)(0x6AF6BCDE)
+F (../Driver/flow_bus.h)(0x6AF85AE3)()
+F (../Driver/hard_i2c.h)(0x6AF85AE3)()
+F (../Driver/board.h)(0x6AF85AE3)()

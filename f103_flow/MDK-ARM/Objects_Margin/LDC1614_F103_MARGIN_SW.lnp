@@ -1,0 +1,13 @@
+--cpu Cortex-M0+
+".\objects_margin\startup_stm32c011xx.o"
+".\objects_margin\system_stm32c0xx.o"
+".\objects_margin\main.o"
+".\objects_margin\f103_flow.o"
+".\objects_margin\margin_i2c.o"
+".\objects_margin\test_board.o"
+".\objects_margin\ldc1614.o"
+".\objects_margin\f103_i2c_adapter.o"
+--strict --scatter ".\Objects_Margin\LDC1614_F103_MARGIN_SW.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list ".\Listings_Margin\LDC1614_F103_MARGIN_SW.map" -o .\Objects_Margin\LDC1614_F103_MARGIN_SW.axf

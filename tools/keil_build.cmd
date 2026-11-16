@@ -1,6 +1,6 @@
 @echo off
 rem ---------------------------------------------------------------------------
-rem Keil uVision (UV4) command-line build / flash helper for LDC1614_FW.
+rem Keil uVision (UV4) command-line build / flash helper for STM32C011F6U6TR.
 rem
 rem   keil_build.cmd            same as build
 rem   keil_build.cmd build      incremental build
@@ -19,7 +19,7 @@ if not exist "%UV4%" (
     exit /b 1
 )
 
-set "PROJ=%~dp0..\MDK-ARM\LDC1614.uvprojx"
+set "PROJ=%~dp0..\MDK-ARM\LDC1614_C011.uvprojx"
 set "LOG=%~dp0..\MDK-ARM\build.log"
 
 if not exist "%PROJ%" (
@@ -46,7 +46,7 @@ goto :run
 set "FLAG=-c"
 
 :run
-echo [Keil] UV4 %FLAG% LDC1614.uvprojx
+echo [Keil] UV4 %FLAG% LDC1614_C011.uvprojx
 "%UV4%" -j0 %FLAG% "%PROJ%" -o "%LOG%"
 set "RC=%ERRORLEVEL%"
 if exist "%LOG%" type "%LOG%"

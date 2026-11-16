@@ -1,12 +1,5 @@
-.\objects\app.o: ..\App\app.c
-.\objects\app.o: ..\App\app.h
-.\objects\app.o: ..\Driver\board.h
-.\objects\app.o: D:\keil32\ARM\ARMCC\Bin\..\include\stdint.h
-.\objects\app.o: ..\Driver\uart.h
-.\objects\app.o: ..\Driver\adc_temp.h
-.\objects\app.o: ..\Device\ldc1614.h
-.\objects\app.o: ..\Service\measure.h
-.\objects\app.o: ..\Service\protocol.h
-.\objects\app.o: ..\App\display.h
-.\objects\app.o: ..\Driver\button.h
-.\objects\app.o: ..\App\console.h
+./objects/app.o: ../App/app.c ../App/app.h ../Driver\board.h \
+  D:\keil32\ARM\ARMCLANG\Bin\..\include\stdint.h ../Driver\uart.h \
+  ../Driver\adc_temp.h ../Device\ldc1614.h ../Driver\hard_i2c.h \
+  ../Service\measure.h ../Service\protocol.h ../App/display.h \
+  ../Driver\button.h ../App/console.h ../App/../test/Driver/test_board.h

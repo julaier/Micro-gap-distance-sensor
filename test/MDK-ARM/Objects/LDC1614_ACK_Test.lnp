@@ -1,0 +1,10 @@
+--cpu Cortex-M0+
+".\objects\startup_stm32c011xx.o"
+".\objects\system_stm32c0xx.o"
+".\objects\main.o"
+".\objects\test_board.o"
+".\objects\test_i2c.o"
+--strict --scatter ".\Objects\LDC1614_ACK_Test.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list ".\Listings\LDC1614_ACK_Test.map" -o .\Objects\LDC1614_ACK_Test.axf

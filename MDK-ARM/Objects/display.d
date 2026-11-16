@@ -1,6 +1,4 @@
-.\objects\display.o: ..\App\display.c
-.\objects\display.o: D:\keil32\ARM\ARMCC\Bin\..\include\string.h
-.\objects\display.o: ..\App\display.h
-.\objects\display.o: D:\keil32\ARM\ARMCC\Bin\..\include\stdint.h
-.\objects\display.o: ..\Driver\oled.h
-.\objects\display.o: ..\Service\measure.h
+./objects/display.o: ../App/display.c \
+  D:\keil32\ARM\ARMCLANG\Bin\..\include\string.h ../App/display.h \
+  D:\keil32\ARM\ARMCLANG\Bin\..\include\stdint.h ../Driver\oled.h \
+  ../Service\measure.h

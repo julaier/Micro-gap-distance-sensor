@@ -1,17 +1,14 @@
-.\objects\adc_temp.o: ..\Driver\adc_temp.c
-.\objects\adc_temp.o: ..\CMSIS\stm32f10x.h
-.\objects\adc_temp.o: ..\CMSIS\core_cm3.h
-.\objects\adc_temp.o: D:\keil32\ARM\ARMCC\Bin\..\include\stdint.h
-.\objects\adc_temp.o: ..\CMSIS\system_stm32f10x.h
-.\objects\adc_temp.o: ..\Library\inc\stm32f10x_conf.h
-.\objects\adc_temp.o: ..\Library\inc\stm32f10x_adc.h
-.\objects\adc_temp.o: ..\CMSIS\stm32f10x.h
-.\objects\adc_temp.o: ..\Library\inc\stm32f10x_exti.h
-.\objects\adc_temp.o: ..\Library\inc\stm32f10x_flash.h
-.\objects\adc_temp.o: ..\Library\inc\stm32f10x_gpio.h
-.\objects\adc_temp.o: ..\Library\inc\stm32f10x_i2c.h
-.\objects\adc_temp.o: ..\Library\inc\stm32f10x_iwdg.h
-.\objects\adc_temp.o: ..\Library\inc\stm32f10x_rcc.h
-.\objects\adc_temp.o: ..\Library\inc\stm32f10x_usart.h
-.\objects\adc_temp.o: ..\Library\inc\misc.h
-.\objects\adc_temp.o: ..\Driver\adc_temp.h
+./objects/adc_temp.o: ../Driver/adc_temp.c \
+  ../Drivers/CMSIS/Device/ST/STM32C0xx/Include\stm32c0xx.h \
+  ../Drivers/CMSIS/Device/ST/STM32C0xx/Include/stm32c011xx.h \
+  ../Drivers/CMSIS/Include\core_cm0plus.h \
+  D:\keil32\ARM\ARMCLANG\Bin\..\include\stdint.h \
+  ../Drivers/CMSIS/Include/cmsis_version.h \
+  ../Drivers/CMSIS/Include/cmsis_compiler.h \
+  ../Drivers/CMSIS/Include/cmsis_armclang_ltm.h \
+  ../Drivers/CMSIS/Include/mpu_armv7.h \
+  ../Drivers/CMSIS/Device/ST/STM32C0xx/Include/system_stm32c0xx.h \
+  ../Drivers/STM32C0xx_HAL_Driver/Inc\stm32c0xx_ll_adc.h \
+  ../Drivers/STM32C0xx_HAL_Driver/Inc\stm32c0xx_ll_bus.h \
+  ../Drivers/STM32C0xx_HAL_Driver/Inc\stm32c0xx_ll_rcc.h \
+  ../Driver/adc_temp.h

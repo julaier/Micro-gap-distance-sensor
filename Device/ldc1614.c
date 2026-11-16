@@ -27,8 +27,8 @@
  * 40MHz / 2.8MHz x 25 约= 357, 先取 384。 [核对] */
 #define LDC1614_SETTLECOUNT_VALUE   0x0180u
 
-/* 时钟分频: 复位默认值 0x1001。 [核对]
- * (FIN_DIV / FREF_DIV 的位域请按数据手册确认) */
+/* 时钟分频配置 0x1001：FIN_DIVIDER=1，FREF_DIVIDER=1。
+ * 这是本工程写入值，不是器件复位默认值。 */
 #define LDC1614_CLOCK_DIV_DEFAULT   0x1001u
 
 /* 器件 ID (SNOSCY9A 寄存器表) */
@@ -56,8 +56,67 @@
 #define LDC_ERR_RCOUNT     (-14)/* 转换时间设置失败 */
 #define LDC_ERR_DRIVE      (-15)/* 驱动电流设置失败 */
 #define LDC_ERR_MUX        (-16)/*MUX通道扫描设置失败*/
-#define LDC_ERR_CONFIG     (-17)/*CONFIG设置失败*/
+#define LDC_ERR_CONFIG     LDC1614_ERR_CONFIG/*CONFIG设置失败*/
 #define LDC_ERR_VERIFY     (-18)/*校验失败*/
+#define LDC_ERR_INT_CONFIG (-19)/*数据就绪中断配置失败*/
+
+static ldc1614_init_trace_t s_init_trace;
+static hard_i2c_diag_t s_init_failure;
+static uint8_t s_have_init_failure;
+
+void ldc1614_set_init_trace(ldc1614_init_trace_t trace)
+{
+    s_init_trace = trace;
+}
+
+void ldc1614_get_init_bus_diag(hard_i2c_diag_t *diag)
+{
+    if (diag == 0) return;
+    if (s_have_init_failure) *diag = s_init_failure;
+    else hard_i2c_get_diag(diag);
+}
+
+/* Do not mistake a sampled ACK for successful configuration. Verify the value.
+ * A CONFIG final-byte NACK is only reconcilable when a later full read proves
+ * that the exact requested value was accepted. Never forgive an address/data
+ * prefix NACK, bus timeout, failed STOP, failed read or mismatched value. */
+static int init_write_verify(uint8_t reg, uint16_t value)
+{
+    ldc1614_init_step_t step = {0};
+    int can_verify;
+
+    step.reg = reg;
+    step.expected = value;
+    step.read_rc = -4;
+    step.write_rc = ldc1614_write_reg(reg, value);
+    hard_i2c_get_diag(&step.bus);
+    can_verify = step.write_rc == 0 ||
+        (reg == LDC1614_REG_CONFIG && step.write_rc == -2 &&
+         step.bus.stage == HARD_I2C_WRITE && step.bus.byte_index == 2u &&
+         step.bus.clocks == 9u && step.bus.ack_level == 1u &&
+         step.bus.stop_rc == 0);
+
+    step.result = step.write_rc;
+    if (can_verify) {
+        /* Keep clock selection and wake-up separate, then allow settling. */
+        if (reg == LDC1614_REG_CONFIG) board_delay_ms(5u);
+        step.read_rc = ldc1614_read_reg(reg, &step.actual);
+        if (step.write_rc == 0 && step.read_rc != 0)
+            hard_i2c_get_diag(&step.bus);
+        if (step.read_rc == 0 && step.actual == value) {
+            step.result = 0;
+            step.nack_verified = step.write_rc == -2 ? 1u : 0u;
+        } else if (step.write_rc == 0) {
+            step.result = step.read_rc != 0 ? step.read_rc : LDC_ERR_VERIFY;
+        }
+    }
+    if (step.result != 0) {
+        s_init_failure = step.bus;
+        s_have_init_failure = 1u;
+    }
+    if (s_init_trace != 0) s_init_trace(&step);
+    return step.result;
+}
 
 /* ------------------------------------------------------------------ */
 
@@ -177,13 +236,38 @@ int ldc1614_read_raw(uint32_t *ch0, uint32_t *ch1, uint16_t *err_flags)
     }
     return 0;
 }
-// 完整初始化, 成功返回 0; 失败返回负数 (见 .c 里的 ERR_xxx)
-// device_id用于接收器件 ID, manufacturer_id用于接收厂商 ID, 都可以为 NULL
+/* Check both unread flags before consuming a pair. */
+int ldc1614_read_fresh_raw(uint32_t *ch0, uint32_t *ch1,
+                          uint16_t *err_flags, uint16_t *status)
+{
+    uint16_t st = 0u, errors = 0u;
+    uint32_t a = 0u, b = 0u;
+    int rc = ldc1614_read_status(&st);
+    if (status != 0) *status = st;
+    if (rc != 0) return rc;
+    if ((st & LDC1614_STATUS_CH01_UNREAD) != LDC1614_STATUS_CH01_UNREAD)
+        return 1;
+    rc = ldc1614_read_raw(&a, &b, &errors);
+    if (rc != 0) return rc;
+    if (ch0 != 0) *ch0 = a;
+    if (ch1 != 0) *ch1 = b;
+    if (err_flags != 0) *err_flags = errors;
+    return a != 0u && b != 0u && errors == 0u ? 0 : LDC1614_ERR_NO_DATA;
+}
+
 int ldc1614_init(uint16_t *device_id, uint16_t *manufacturer_id)
+{
+    return ldc1614_init_clock(device_id, manufacturer_id, 1);
+}
+
+int ldc1614_init_clock(uint16_t *device_id, uint16_t *manufacturer_id,
+                      int external)
 {
     uint16_t v = 0u;
     uint16_t mid = 0u;
     uint16_t did = 0u;
+
+    s_have_init_failure = 0u;
 
     /* 1. 软复位 */
     if (ldc1614_write_reg(LDC1614_REG_RESET_DEV, LDC1614_RESET_MAGIC) != 0) {
@@ -209,53 +293,58 @@ int ldc1614_init(uint16_t *device_id, uint16_t *manufacturer_id)
     }
 
     /* 3. 通道时钟分频 (CH0 / CH1) */
-    if (ldc1614_write_reg(LDC1614_REG_CLOCK_DIVIDERS_CH0, LDC1614_CLOCK_DIV_DEFAULT) != 0 ||
-        ldc1614_write_reg(LDC1614_REG_CLOCK_DIVIDERS_CH1, LDC1614_CLOCK_DIV_DEFAULT) != 0) {
+    if (init_write_verify(LDC1614_REG_CLOCK_DIVIDERS_CH0, LDC1614_CLOCK_DIV_DEFAULT) != 0 ||
+        init_write_verify(LDC1614_REG_CLOCK_DIVIDERS_CH1, LDC1614_CLOCK_DIV_DEFAULT) != 0) {
         return LDC_ERR_CLKDIV;
     }
 
     /* 4. 建立时间 (必须先于 RCOUNT) */
-    if (ldc1614_write_reg(LDC1614_REG_SETTLECOUNT_CH0, LDC1614_SETTLECOUNT_VALUE) != 0 ||
-        ldc1614_write_reg(LDC1614_REG_SETTLECOUNT_CH1, LDC1614_SETTLECOUNT_VALUE) != 0) {
+    if (init_write_verify(LDC1614_REG_SETTLECOUNT_CH0, LDC1614_SETTLECOUNT_VALUE) != 0 ||
+        init_write_verify(LDC1614_REG_SETTLECOUNT_CH1, LDC1614_SETTLECOUNT_VALUE) != 0) {
         return LDC_ERR_SETTLE;
     }
 
     /* 5. 转换时间 */
-    if (ldc1614_write_reg(LDC1614_REG_RCOUNT_CH0, LDC1614_RCOUNT_VALUE) != 0 ||
-        ldc1614_write_reg(LDC1614_REG_RCOUNT_CH1, LDC1614_RCOUNT_VALUE) != 0) {
+    if (init_write_verify(LDC1614_REG_RCOUNT_CH0, LDC1614_RCOUNT_VALUE) != 0 ||
+        init_write_verify(LDC1614_REG_RCOUNT_CH1, LDC1614_RCOUNT_VALUE) != 0) {
         return LDC_ERR_RCOUNT;
     }
 
     /* 6. 驱动电流初值 (交给自动幅度校正继续调) */
-    if (ldc1614_write_reg(LDC1614_REG_DRIVE_CURRENT_CH0, LDC1614_DRIVE_CURRENT_VALUE) != 0 ||
-        ldc1614_write_reg(LDC1614_REG_DRIVE_CURRENT_CH1, LDC1614_DRIVE_CURRENT_VALUE) != 0) {
+    if (init_write_verify(LDC1614_REG_DRIVE_CURRENT_CH0, LDC1614_DRIVE_CURRENT_VALUE) != 0 ||
+        init_write_verify(LDC1614_REG_DRIVE_CURRENT_CH1, LDC1614_DRIVE_CURRENT_VALUE) != 0) {
         return LDC_ERR_DRIVE;
     }
 
     /* 7. MUX: 自动扫描 CH0 + CH1 */
-    if (ldc1614_write_reg(LDC1614_REG_MUX_CONFIG, LDC1614_MUX_AUTOSCAN_CH01) != 0) {
+    if (init_write_verify(LDC1614_REG_MUX_CONFIG, LDC1614_MUX_AUTOSCAN_CH01) != 0) {
         return LDC_ERR_MUX;
     }
 
-    /* 8. CONFIG: 用外部 40MHz 有源晶振做参考时钟, 并退出复位后的 Sleep Mode。 */
+    /* Enable DRDY -> INTB; reset leaves ERROR_CONFIG.DRDY_2INT disabled.
+     * Keep the 20ms polling fallback in the application as well. */
+    if (init_write_verify(LDC1614_REG_ERROR_CONFIG, 0x0001u) != 0) {
+        return LDC_ERR_INT_CONFIG;
+    }
+
+    /* 8. Select reference while asleep, verify, then wake. Only bit9 differs
+     * between attempts. Multi-channel internal reference permits FREF <=55MHz
+     * (TI table43), so keep the proven /1 divider and all old sensor settings. */
     if (ldc1614_read_reg(LDC1614_REG_CONFIG, &v) != 0) {
         return LDC_ERR_CONFIG;
     }
-    // 清掉 SLEEP_MODE, 再把 REF_CLK_SRC 置 1: 用外部 CLKIN(40MHz), 最后写回寄存器
-    v &= (uint16_t)~(LDC1614_CONFIG_SLEEP_MODE | LDC1614_CONFIG_REF_CLK_SRC);
-    v |= LDC1614_CONFIG_REF_CLK_SRC;
-    if (ldc1614_write_reg(LDC1614_REG_CONFIG, v) != 0) {
+    v |= LDC1614_CONFIG_SLEEP_MODE;
+    v &= (uint16_t)~LDC1614_CONFIG_REF_CLK_SRC;
+    if (external) v |= LDC1614_CONFIG_REF_CLK_SRC;
+    if (init_write_verify(LDC1614_REG_CONFIG, v) != 0) {
         return LDC_ERR_CONFIG;
     }
 
-    /* 9. 回读校验, 配错时上电就能发现 */
-    if (ldc1614_read_reg(LDC1614_REG_CONFIG, &v) != 0) {
-        return LDC_ERR_VERIFY;
-    }
-    // 校验 CONFIG 寄存器, 确认 REF_CLK_SRC=1(外部时钟), SLEEP_MODE 位被清除
-    if ((v & LDC1614_CONFIG_REF_CLK_SRC) == 0u ||
-        (v & LDC1614_CONFIG_SLEEP_MODE) != 0u) {
-        return LDC_ERR_VERIFY;
+    /* 9. Wake without changing clock source in the same transaction.
+     * Exact target after reset: external=0x0A01, internal=0x0801. */
+    v &= (uint16_t)~LDC1614_CONFIG_SLEEP_MODE;
+    if (init_write_verify(LDC1614_REG_CONFIG, v) != 0) {
+        return LDC_ERR_CONFIG;
     }
 
     return 0;
