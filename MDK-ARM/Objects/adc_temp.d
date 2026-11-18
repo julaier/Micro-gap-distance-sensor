@@ -1,0 +1,17 @@
+.\objects\adc_temp.o: ..\Driver\adc_temp.c
+.\objects\adc_temp.o: ..\CMSIS\stm32f10x.h
+.\objects\adc_temp.o: ..\CMSIS\core_cm3.h
+.\objects\adc_temp.o: D:\keil32\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\adc_temp.o: ..\CMSIS\system_stm32f10x.h
+.\objects\adc_temp.o: ..\Library\inc\stm32f10x_conf.h
+.\objects\adc_temp.o: ..\Library\inc\stm32f10x_adc.h
+.\objects\adc_temp.o: ..\CMSIS\stm32f10x.h
+.\objects\adc_temp.o: ..\Library\inc\stm32f10x_exti.h
+.\objects\adc_temp.o: ..\Library\inc\stm32f10x_flash.h
+.\objects\adc_temp.o: ..\Library\inc\stm32f10x_gpio.h
+.\objects\adc_temp.o: ..\Library\inc\stm32f10x_i2c.h
+.\objects\adc_temp.o: ..\Library\inc\stm32f10x_iwdg.h
+.\objects\adc_temp.o: ..\Library\inc\stm32f10x_rcc.h
+.\objects\adc_temp.o: ..\Library\inc\stm32f10x_usart.h
+.\objects\adc_temp.o: ..\Library\inc\misc.h
+.\objects\adc_temp.o: ..\Driver\adc_temp.h
